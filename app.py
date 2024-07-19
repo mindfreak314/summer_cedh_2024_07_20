@@ -32,10 +32,11 @@ for player in r1_loss:
 match_logs = loss_matches + match_logs
 ########################################################################################################################
 
-@st.cache_data
-def prep_control_sheet(control_sheet):
+# @st.cache_data
+def prep_control_sheet(control_sheet, with_points = False):
     control_sheet = utils.add_wld(control_sheet, match_logs)
-    control_sheet = utils.add_standing(control_sheet, match_logs, method=ranking_method)
+    if with_points:
+        control_sheet = utils.add_standing(control_sheet, match_logs, method=ranking_method)
 
     return control_sheet
 
@@ -83,17 +84,20 @@ try:
 except:
     pass
 
-
-with st.expander("Standing"):
-    control_sheet_standing = control_sheet.copy().reset_index()
-    if search_player:
-        control_sheet_standing = control_sheet_standing[control_sheet_standing.Player.str.lower().str.contains(search_player.lower())]
-    # control_sheet_standing.drop(["dropped", "n_3P_pods"], axis = 1, inplace=True)
-    # control_sheet_standing = control_sheet_standing[["Rank", "Player", "Points", "Regular points", "win", "loss", "draw"]]
-    control_sheet_standing = control_sheet_standing[["Rank", "Player", "Points", "win", "loss", "draw", "bye"]]
-    control_sheet_standing[["win", "loss", "draw", "bye"]] = control_sheet_standing[["win", "loss", "draw", "bye"]].astype(int)
-    # control_sheet_standing["Points"] = control_sheet_standing["Points"].astype(int)
-    st.markdown(control_sheet_standing.style.format(f).hide(axis="index").to_html(), unsafe_allow_html=True)
+try:
+    top16_df = pd.read_excel("control_sheet.ods", engine="odf", sheet_name="top 16")
+    with st.expander("Standing"):
+        control_sheet_standing = prep_control_sheet(control_sheet, with_points=True).reset_index()
+        if search_player:
+            control_sheet_standing = control_sheet_standing[control_sheet_standing.Player.str.lower().str.contains(search_player.lower())]
+        # control_sheet_standing.drop(["dropped", "n_3P_pods"], axis = 1, inplace=True)
+        # control_sheet_standing = control_sheet_standing[["Rank", "Player", "Points", "Regular points", "win", "loss", "draw"]]
+        control_sheet_standing = control_sheet_standing[["Rank", "Player", "Points", "win", "loss", "draw", "bye"]]
+        control_sheet_standing[["win", "loss", "draw", "bye"]] = control_sheet_standing[["win", "loss", "draw", "bye"]].astype(int)
+        # control_sheet_standing["Points"] = control_sheet_standing["Points"].astype(int)
+        st.markdown(control_sheet_standing.style.format(f).hide(axis="index").to_html(), unsafe_allow_html=True)
+except:
+    pass
 
 
 

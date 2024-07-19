@@ -50,6 +50,7 @@ def get_oppo_dict(control_sheet_general):
             round_df = pd.read_excel("control_sheet.ods", engine="odf", sheet_name=f"round {i}")
 
             for pod in round_df.Pod.unique():
+                if pod == "BYE": continue
                 pod_players = round_df[round_df.Pod == pod].Player.values
                 for tuple in list(itertools.combinations(pod_players, r = 2)):
                     oppo_dict[tuple[0]].append(tuple[1])
