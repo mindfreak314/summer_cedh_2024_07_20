@@ -32,7 +32,7 @@ for player in r1_loss:
 match_logs = loss_matches + match_logs
 ########################################################################################################################
 
-# @st.cache_data
+@st.cache_data
 def prep_control_sheet(control_sheet):
     control_sheet = utils.add_wld(control_sheet, match_logs)
     control_sheet = utils.add_standing(control_sheet, match_logs, method=ranking_method)
