@@ -216,16 +216,18 @@ def hareruya_permutations_with_draw_and_byes(control_sheet, match_logs):
             elif match_result == "draw":
                 for player in match_players:
                     control_sheet_perm.loc[player, "Points"] += points_for_winner/len(match_players)
+            elif match_result == "loss":
+                pass
             else:
                 control_sheet_perm.loc[match_result, "Points"] += points_for_winner
         
-        # account for byes
-        for player in bye_players:
-            avg_point_move = (control_sheet_perm.loc[player, "Points"] - 1000) / len(perm)
-            avg_point_move = np.max([0, avg_point_move])
-            control_sheet_perm.loc[player, "Points"] += avg_point_move
+        # account for byes , this accounts for byes on each single permutation. Probably also fine, but rules document says to do it other way
+        # for player in bye_players:
+        #     avg_point_move = (control_sheet_perm.loc[player, "Points"] - 1000) / (len(perm) - 1) # -1 because one of the rounds was the bye
+        #     avg_point_move = np.max([0, avg_point_move])
+        #     control_sheet_perm.loc[player, "Points"] += avg_point_move
 
-            control_sheet_perm.loc[player, "avg_point_move"] = avg_point_move
+        #     control_sheet_perm.loc[player, "avg_point_move"] = avg_point_move
 
         
         control_sheet_perm["Regular points"] = control_sheet_perm["win"]*5 + control_sheet_perm["draw"]
@@ -234,6 +236,13 @@ def hareruya_permutations_with_draw_and_byes(control_sheet, match_logs):
     # combine
     control_sheet = pd.concat(sheets)
     control_sheet = control_sheet.groupby(control_sheet.index).mean()
+
+    # account for byes
+    control_sheet["points_before_bye"] = control_sheet["Points"].copy()
+    control_sheet["avg_point_move"] = (control_sheet["points_before_bye"] - 1000) / (max_round_number - control_sheet["bye"]) # -1 because one of the rounds was the bye
+    control_sheet["avg_point_move"] = control_sheet["avg_point_move"].clip(lower=0)
+    control_sheet["Points"] = control_sheet["points_before_bye"] + control_sheet["avg_point_move"]*control_sheet["bye"]
+
 
     control_sheet["Rank"] = (
         control_sheet[["Points", "Random"]]
