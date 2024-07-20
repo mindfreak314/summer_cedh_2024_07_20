@@ -131,18 +131,22 @@ if current_round > 0:
 
     if 'Result' in round_df.columns:
         # merge with poitns before and after
-        round_df = (
-            round_df
+        round_df_mobile = (
+            round_df.copy()
             # .merge(standings_after_rounds[display_round-1].rename({"Points":"Points before"}, axis = 1).reset_index(),  on="Player")
             # .merge(standings_after_rounds[display_round].rename({"Points":"Points after"}, axis = 1).reset_index(),  on="Player")
             )
         
         # round_df[["Points before", "Points after"]] = round_df[["Points before", "Points after"]].astype(int)
         # round_df[["Points before", "Points after"]] = round_df[["Points before", "Points after"]].round(decimals=2)
-        round_df = round_df.style.applymap(color_result, subset=['Result']).format(f).hide(axis="index")
-        st.markdown(round_df.to_html(), unsafe_allow_html=True)
+        round_df_mobile = round_df_mobile.style.applymap(color_result, subset=['Result']).format(f).hide(axis="index")
     else:
-        # round_df = round_df#.style.hide(axis="index")
+        round_df_mobile = round_df.copy().style.hide(axis="index")
+
+    st.markdown(round_df_mobile.to_html(), unsafe_allow_html=True)
+
+    st.write("")
+    with st.expander("Pairings for beamer"):
         columns = st.columns(4)
 
         col_counter = 0
@@ -150,5 +154,3 @@ if current_round > 0:
             columns[col_counter%4].markdown(round_df[round_df.Pod == i].style.hide(axis="index").to_html(), unsafe_allow_html=True)
             columns[col_counter%4].write("")
             col_counter += 1
-
-    # st.markdown(round_df.to_html(), unsafe_allow_html=True)
